@@ -13,11 +13,11 @@ export class Restaurant {
   @Column()
   name: string;
 
-  @Field(type => Boolean)
+  @Field(type => Boolean, { nullable: true })
   @Column()
   isVegan: boolean;
 
-  @Field(type => String)
+  @Field(type => String, { defaultValue: '안양' })
   @Column()
   address: string;
 
