@@ -5,7 +5,6 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @ObjectType()
 @Entity()
 export class Restaurant {
-
   @Field(type => Number)
   @PrimaryGeneratedColumn()
   id: number;
