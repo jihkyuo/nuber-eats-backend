@@ -1,6 +1,6 @@
 import { Column, Entity } from 'typeorm';
 import { CoreEntity } from '../../common/entities/common.entity';
-import { InputType, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 
 type UserRole = 'client' | 'owner' | 'delivery';
 
@@ -10,11 +10,14 @@ type UserRole = 'client' | 'owner' | 'delivery';
 export class User extends CoreEntity {
 
   @Column()
+  @Field(type => String)
   email: string;
 
   @Column()
+  @Field(type => String)
   password: string;
 
   @Column()
+  @Field(type => String)
   role: UserRole;
 }
