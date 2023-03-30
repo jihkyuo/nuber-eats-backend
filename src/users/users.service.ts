@@ -54,7 +54,7 @@ export class UsersService {
           error: '잘못된 비밀번호 입니다',
         };
       }
-      const token = jwt.sign({ id: user.id }, this.config.get('SECRET_KEY'));
+      const token = jwt.sign({ id: user.id }, this.config.get('PRIVATE_KEY'));
 
       return {
         ok: true,
