@@ -15,7 +15,6 @@ export class UsersService {
   ) {
   }
 
-
   async createAccount({ email, password, role }: CreateAccountInput): Promise<{ ok: boolean, error?: string }> {
     try {
       const exists = await this.users.findOne({ where: { email } });
@@ -63,5 +62,9 @@ export class UsersService {
         error,
       };
     }
+  }
+
+  async findById(id: number): Promise<User> {
+    return this.users.findOne({ where: { id } });
   }
 }
