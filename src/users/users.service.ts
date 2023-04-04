@@ -40,7 +40,10 @@ export class UsersService {
 
   async login({ email, password }: LoginInput): Promise<{ ok: boolean, error?: string, token?: string }> {
     try {
-      const user = await this.users.findOne({ where: { email } });
+      const user = await this.users.findOne({
+        where: { email },
+        select: ['password', 'id'],
+      });
       if (!user) {
         return {
           ok: false,
@@ -84,15 +87,21 @@ export class UsersService {
   }
 
   async verifyEmail(code: string): Promise<boolean> {
-    const verification = await this.verifications.findOne({
-      where: { code },
-      relations: ['user'],
-    });
-    if (verification) {
-      verification.user.verified = true;
-      console.log(verification.user)
-      await this.users.save(verification.user);
+    try {
+      const verification = await this.verifications.findOne({
+        where: { code },
+        relations: ['user'],
+      });
+      if (verification) {
+        verification.user.verified = true;
+        await this.users.save(verification.user);
+        return true;
+      }
+      throw new Error();
+    } catch (error) {
+      console.log(error);
+      return false;
     }
-    return false;
+
   }
 }
