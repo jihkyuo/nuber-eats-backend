@@ -7,11 +7,13 @@ import { CreateAccountInput } from './dtos/create-account.dto';
 import { LoginInput } from './dtos/login.dto';
 import { JwtService } from '../jwt/jwt.service';
 import { EditProfileInput } from './dtos/edit-profile.dto';
+import { Verification } from './entities/verification.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
+    @InjectRepository(Verification) private readonly verifications: Repository<Verification>,
     private readonly jwtService: JwtService,
   ) {
   }
@@ -25,7 +27,8 @@ export class UsersService {
           error: '이미 이메일을 가진 사용자가 있습니다.',
         };
       }
-      await this.users.save(this.users.create({ email, password, role }));
+      const user = await this.users.save(this.users.create({ email, password, role }));
+      await this.verifications.save(this.verifications.create({ user }));
       return { ok: true };
     } catch (err) {
       return {
@@ -71,7 +74,11 @@ export class UsersService {
 
   async editProfile(userId: number, { email, password }: EditProfileInput): Promise<User> {
     const user = await this.users.findOne({ where: { id: userId } });
-    if (email) user.email = email;
+    if (email) {
+      user.email = email;
+      user.verified = false;
+      await this.verifications.save(this.verifications.create({ user }));
+    }
     if (password) user.password = password;
     return this.users.save(user);
   }
