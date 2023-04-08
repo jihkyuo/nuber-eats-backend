@@ -5,6 +5,7 @@ import { User } from './entities/user.entity';
 import { Verification } from './entities/verification.entity';
 import { JwtService } from '../jwt/jwt.service';
 import { MailService } from '../mail/mail.service';
+import { Repository } from 'typeorm';
 
 const mockRepository = {
   findOne: jest.fn(),
@@ -21,9 +22,11 @@ const mockMailService = {
   sendVerificationEmail: jest.fn(),
 };
 
-describe('UserService', () => {
+type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>
 
+describe('UserService', () => {
   let service: UsersService;
+  let usersRepository: MockRepository<User>;
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
@@ -48,6 +51,7 @@ describe('UserService', () => {
       ],
     }).compile();
     service = module.get<UsersService>(UsersService);
+    usersRepository = module.get(getRepositoryToken(User));
   });
 
 
@@ -55,7 +59,24 @@ describe('UserService', () => {
     expect(service).toBeDefined();
   });
 
-  it.todo('createAccount');
+  describe('createAccount', () => {
+    it('should fail if user exists', async () => {
+      usersRepository.findOne.mockResolvedValue({
+        id: 1,
+        email: 'mockemail',
+      });
+      const result = await service.createAccount({
+        email: '',
+        password: '',
+        role: 0,
+      });
+      expect(result).toMatchObject({
+        ok: false,
+        error: '이미 이메일을 가진 사용자가 있습니다.',
+      });
+    });
+  });
+
   it.todo('login');
   it.todo('findById');
   it.todo('editProfile');
