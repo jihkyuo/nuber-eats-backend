@@ -80,9 +80,14 @@ describe('UserService', () => {
 
     it('새로운 유저 생성', async () => {
       usersRepository.findOne.mockResolvedValue(undefined); // user 가 없다고 속임
+      usersRepository.create.mockReturnValue(createAccountArgs);
       await service.createAccount(createAccountArgs);
+
       expect(usersRepository.create).toHaveBeenCalledTimes(1); // 단 한번 호출될거라 기대
       expect(usersRepository.create).toHaveBeenCalledWith(createAccountArgs);
+
+      expect(usersRepository.save).toHaveBeenCalledTimes(1);
+      expect(usersRepository.save).toHaveBeenCalledWith(createAccountArgs);
     });
   });
 
