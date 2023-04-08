@@ -7,11 +7,11 @@ import { JwtService } from '../jwt/jwt.service';
 import { MailService } from '../mail/mail.service';
 import { Repository } from 'typeorm';
 
-const mockRepository = {
+const mockRepository = () => ({
   findOne: jest.fn(),
   save: jest.fn(),
   create: jest.fn(),
-};
+});
 
 const mockJwtService = {
   sign: jest.fn(),
@@ -34,11 +34,11 @@ describe('UserService', () => {
         UsersService,
         {
           provide: getRepositoryToken(User),
-          useValue: mockRepository,
+          useValue: mockRepository(),
         },
         {
           provide: getRepositoryToken(Verification),
-          useValue: mockRepository,
+          useValue: mockRepository(),
         },
         {
           provide: JwtService,
@@ -60,24 +60,28 @@ describe('UserService', () => {
   });
 
   describe('createAccount', () => {
+    const createAccountArgs = {
+      email: '',
+      password: '',
+      role: 0,
+    };
+
     it('should fail if user exists', async () => {
       usersRepository.findOne.mockResolvedValue({
         id: 1,
         email: 'mockemail',
       });
-      const result = await service.createAccount({
-        email: '',
-        password: '',
-        role: 0,
-      });
+      const result = await service.createAccount(createAccountArgs);
       expect(result).toMatchObject({
         ok: false,
         error: '이미 이메일을 가진 사용자가 있습니다.',
       });
     });
 
-    it('새로운 유저 생성', () => {
-      '';
+    it('새로운 유저 생성', async () => {
+      usersRepository.findOne.mockResolvedValue(undefined); // user 가 없다고 속임
+      await service.createAccount(createAccountArgs);
+      expect(usersRepository.create).toHaveBeenCalledTimes(1); // 단 한번 호출될거라 기대
     });
   });
 
