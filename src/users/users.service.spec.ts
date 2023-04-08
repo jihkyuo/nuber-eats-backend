@@ -139,18 +139,16 @@ describe('UserService', () => {
       password: '123',
     };
 
-    // it('에러 결과', async () => {
-    //   usersRepository.findOne.mockRejectedValue(new Error('에러 발생'));
-    //   try {
-    //     const result = await service.login(loginArgs);
-    //
-    //   } catch (error) {
-    //     expect(result).toEqual({
-    //       ok: false,
-    //       error,
-    //     });
-    //   }
-    // });
+    it('에러 결과', async () => {
+      const error = new Error('에러 발생');
+      usersRepository.findOne.mockRejectedValue(error);
+      const result = await service.login(loginArgs);
+
+      expect(result).toEqual({
+        ok: false,
+        error,
+      });
+    });
 
     it('user를 찾지 못했을 경우 결과', async () => {
       usersRepository.findOne.mockResolvedValue(null);
