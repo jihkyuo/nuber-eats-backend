@@ -155,11 +155,25 @@ describe('UserService', () => {
       const result = await service.login(loginArgs);
 
       expect(usersRepository.findOne).toHaveBeenCalledTimes(1);
-      expect(usersRepository.findOne).toHaveBeenCalledWith(expect.any(Object))
+      expect(usersRepository.findOne).toHaveBeenCalledWith(expect.any(Object));
 
       expect(result).toEqual({
         ok: false,
         error: 'User를 찾을 수 없습니다',
+      });
+    });
+
+    it('password가 잘못됐을 경우 실패', async () => {
+      const mockedUser = {
+        checkPassword: jest.fn(() => Promise.resolve(false)),
+      };
+
+      usersRepository.findOne.mockResolvedValue(mockedUser);
+      const result = await service.login(loginArgs);
+
+      expect(result).toEqual({
+        ok: false,
+        error: '잘못된 비밀번호 입니다',
       });
     });
   });
