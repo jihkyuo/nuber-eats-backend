@@ -89,13 +89,15 @@ describe('UserService', () => {
 
       /** for verification test */
       usersRepository.save.mockResolvedValue(createAccountArgs);
-      verificationRepository.create.mockReturnValue(createAccountArgs);
+      verificationRepository.create.mockReturnValue({
+        user: createAccountArgs,
+      });
 
       /** for mailService test */
       verificationRepository.save.mockResolvedValue({
         code: 'code',
       });
-      await service.createAccount(createAccountArgs);
+      const result = await service.createAccount(createAccountArgs);
 
       expect(usersRepository.create).toHaveBeenCalledTimes(1); // 단 한번 호출될거라 기대
       expect(usersRepository.create).toHaveBeenCalledWith(createAccountArgs);
@@ -109,10 +111,14 @@ describe('UserService', () => {
       });
 
       expect(verificationRepository.save).toHaveBeenCalledTimes(1);
-      expect(verificationRepository.save).toHaveBeenCalledWith(createAccountArgs);
+      expect(verificationRepository.save).toHaveBeenCalledWith({
+        user: createAccountArgs
+      });
 
       expect(mailService.sendVerificationEmail).toHaveBeenCalledTimes(1);
       expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(expect.any(String), expect.any(String));
+
+      expect(result).toEqual({ ok: true });
     });
   });
 
