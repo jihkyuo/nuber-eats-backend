@@ -112,13 +112,23 @@ describe('UserService', () => {
 
       expect(verificationRepository.save).toHaveBeenCalledTimes(1);
       expect(verificationRepository.save).toHaveBeenCalledWith({
-        user: createAccountArgs
+        user: createAccountArgs,
       });
 
       expect(mailService.sendVerificationEmail).toHaveBeenCalledTimes(1);
       expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(expect.any(String), expect.any(String));
 
       expect(result).toEqual({ ok: true });
+    });
+
+    it('should fail on exception', async () => {
+      usersRepository.findOne.mockRejectedValue(new Error('에러 발생'));
+      const result = await service.createAccount(createAccountArgs);
+      console.log('resultresultresultresult',result)
+      expect(result).toEqual({
+        ok: false,
+        error: '계정을 생성할 수 없습니다.',
+      });
     });
   });
 
