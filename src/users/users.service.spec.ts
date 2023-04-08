@@ -30,7 +30,7 @@ describe('UserService', () => {
   let verificationRepository: MockRepository<Verification>;
   let mailService: MailService;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
         UsersService,
@@ -124,7 +124,6 @@ describe('UserService', () => {
     it('should fail on exception', async () => {
       usersRepository.findOne.mockRejectedValue(new Error('에러 발생'));
       const result = await service.createAccount(createAccountArgs);
-      console.log('resultresultresultresult',result)
       expect(result).toEqual({
         ok: false,
         error: '계정을 생성할 수 없습니다.',
@@ -132,7 +131,39 @@ describe('UserService', () => {
     });
   });
 
-  it.todo('login');
+  describe('login', () => {
+    const loginArgs = {
+      email: 'test@test.com',
+      password: '123',
+    };
+
+    // it('에러 결과', async () => {
+    //   usersRepository.findOne.mockRejectedValue(new Error('에러 발생'));
+    //   try {
+    //     const result = await service.login(loginArgs);
+    //
+    //   } catch (error) {
+    //     expect(result).toEqual({
+    //       ok: false,
+    //       error,
+    //     });
+    //   }
+    // });
+
+    it('user를 찾지 못했을 경우 결과', async () => {
+      usersRepository.findOne.mockResolvedValue(null);
+      const result = await service.login(loginArgs);
+
+      expect(usersRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(usersRepository.findOne).toHaveBeenCalledWith(expect.any(Object))
+
+      expect(result).toEqual({
+        ok: false,
+        error: 'User를 찾을 수 없습니다',
+      });
+    });
+  });
+
   it.todo('findById');
   it.todo('editProfile');
   it.todo('verifyEmail');
