@@ -14,7 +14,7 @@ const mockRepository = () => ({
 });
 
 const mockJwtService = {
-  sign: jest.fn(),
+  sign: jest.fn(() => '인증된 토큰 Mocked'),
   verify: jest.fn(),
 };
 
@@ -29,6 +29,7 @@ describe('UserService', () => {
   let usersRepository: MockRepository<User>;
   let verificationRepository: MockRepository<Verification>;
   let mailService: MailService;
+  let jwtService: JwtService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -53,9 +54,10 @@ describe('UserService', () => {
       ],
     }).compile();
     service = module.get<UsersService>(UsersService);
-    mailService = module.get<MailService>(MailService);
     usersRepository = module.get(getRepositoryToken(User));
     verificationRepository = module.get(getRepositoryToken(Verification));
+    mailService = module.get<MailService>(MailService);
+    jwtService = module.get<JwtService>(JwtService);
   });
 
 
@@ -174,6 +176,24 @@ describe('UserService', () => {
       expect(result).toEqual({
         ok: false,
         error: '잘못된 비밀번호 입니다',
+      });
+    });
+
+    it('password 가 일치하면, token 을 return 해야함', async () => {
+      const mockedUser = {
+        id: 1,
+        checkPassword: jest.fn(() => Promise.resolve(true)),
+      };
+
+      usersRepository.findOne.mockResolvedValue(mockedUser);
+      const result = await service.login(loginArgs);
+
+      expect(jwtService.sign).toHaveBeenCalledTimes(1);
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.any(Number));
+
+      expect(result).toEqual({
+        ok: true,
+        token: '인증된 토큰 Mocked',
       });
     });
   });
