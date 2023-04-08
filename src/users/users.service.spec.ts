@@ -82,6 +82,7 @@ describe('UserService', () => {
       usersRepository.findOne.mockResolvedValue(undefined); // user 가 없다고 속임
       await service.createAccount(createAccountArgs);
       expect(usersRepository.create).toHaveBeenCalledTimes(1); // 단 한번 호출될거라 기대
+      expect(usersRepository.create).toHaveBeenCalledWith(createAccountArgs);
     });
   });
 
