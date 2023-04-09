@@ -204,7 +204,7 @@ describe('UserService', () => {
       const result = await service.findById(findByIdArg.id);
 
       expect(result).toEqual({ ok: true, user: findByIdArg });
-    });자
+    });
   });
   it.todo('editProfile');
   it.todo('verifyEmail');
