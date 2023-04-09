@@ -198,14 +198,26 @@ describe('UserService', () => {
   });
 
   describe('findById', () => {
+    const findByIdArg = { id: 1 };
+
     it('user가 존재', async () => {
-      const findByIdArg = { id: 1 };
       usersRepository.findOneOrFail.mockResolvedValue(findByIdArg);
       const result = await service.findById(findByIdArg.id);
 
       expect(result).toEqual({ ok: true, user: findByIdArg });
     });
+
+    it('user가 존재하지 하지 않을 때', async () => {
+      usersRepository.findOneOrFail.mockRejectedValue(new Error('에러 발생'));
+      const result = await service.findById(findByIdArg.id);
+
+      expect(result).toEqual({
+        ok: false,
+        error: '유저를 찾을 수 없습니다',
+      })
+    });
   });
+
   it.todo('editProfile');
   it.todo('verifyEmail');
 });
