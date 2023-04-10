@@ -1,8 +1,15 @@
 import { Test } from '@nestjs/testing';
 import { JwtService } from './jwt.service';
 import { CONFIG_OPTIONS } from '../common/common.constants';
+import * as jwt from 'jsonwebtoken';
 
-const TEST_KEY = 'testKey';
+jest.mock('jsonwebtoken', () => {
+  return {
+    sign: jest.fn(() => 'Mocked TOKEN'),
+  };
+});
+
+const TEST_PRIVATE_KEY = 'testKey';
 
 describe('JwtService', () => {
   let jwtService: JwtService;
@@ -13,7 +20,7 @@ describe('JwtService', () => {
         JwtService,
         {
           provide: CONFIG_OPTIONS,
-          useValue: { privateKey: TEST_KEY },
+          useValue: { privateKey: TEST_PRIVATE_KEY },
         },
       ],
     }).compile();
@@ -26,8 +33,20 @@ describe('JwtService', () => {
 
   describe('sign', () => {
     it('사인된 토큰 반환', () => {
+      const mockedSignArg = {
+        userId: 1,
+      };
+      const token = jwtService.sign(mockedSignArg.userId);
 
+      expect(jwt.sign).toHaveBeenCalledTimes(1)
+      expect(jwt.sign).toHaveBeenCalledWith(
+        { id: mockedSignArg.userId },
+        TEST_PRIVATE_KEY
+      );
     });
-
   });
+
+  describe('verify', () => {
+
+  })
 });
