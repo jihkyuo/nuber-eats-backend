@@ -251,7 +251,35 @@ describe('UserService', () => {
       });
       expect(verificationRepository.save).toHaveBeenCalledWith(newVerification);
 
-      expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(newUser.email, newVerification.code)
+      expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(newUser.email, newVerification.code);
+    });
+
+    it('비밀번호 변경', async () => {
+      const editProfileArgs = {
+        userId: 1,
+        input: { password: '123' },
+      };
+
+      usersRepository.findOne.mockResolvedValue({ password: 'old' });
+      const result = await service.editProfile(editProfileArgs.userId, editProfileArgs.input);
+      expect(usersRepository.save).toHaveBeenCalledTimes(1);
+      expect(usersRepository.save).toHaveBeenCalledWith(editProfileArgs.input);
+
+      expect(result).toEqual({ ok: true });
+    });
+
+    it('에러', async () => {
+      const editProfileArgs = {
+        userId: 1,
+        input: { password: '123' },
+      };
+
+      usersRepository.findOne.mockRejectedValue(new Error('Error'));
+      const result = await service.editProfile(editProfileArgs.userId, editProfileArgs.input);
+      expect(result).toEqual({
+        ok: false,
+        error: '프로필을 업데이트 할 수 없습니다.',
+      });
     });
   });
   it.todo('verifyEmail');
