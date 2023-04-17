@@ -4,7 +4,6 @@ import { EmailVar, MailModuleOptions } from './mail.interface';
 import * as FormData from 'form-data';
 import got from 'got';
 
-
 @Injectable()
 export class MailService {
   constructor(
@@ -12,7 +11,7 @@ export class MailService {
   ) {
   }
 
-  private async sendEmail(
+  async sendEmail(
     subject: string,
     template: string,
     emailVars: EmailVar[],
