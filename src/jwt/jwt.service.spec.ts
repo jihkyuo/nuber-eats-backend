@@ -3,13 +3,16 @@ import { JwtService } from './jwt.service';
 import { CONFIG_OPTIONS } from '../common/common.constants';
 import * as jwt from 'jsonwebtoken';
 
+
+const TEST_PRIVATE_KEY = 'testKey';
+const USER_ID = 1;
+
 jest.mock('jsonwebtoken', () => {
   return {
     sign: jest.fn(() => 'Mocked TOKEN'),
+    verify: jest.fn(() => ({ id: USER_ID })),
   };
 });
-
-const TEST_PRIVATE_KEY = 'testKey';
 
 describe('JwtService', () => {
   let jwtService: JwtService;
@@ -33,20 +36,24 @@ describe('JwtService', () => {
 
   describe('sign', () => {
     it('사인된 토큰 반환', () => {
-      const mockedSignArg = {
-        userId: 1,
-      };
-      const token = jwtService.sign(mockedSignArg.userId);
+      const token = jwtService.sign(USER_ID);
 
-      expect(jwt.sign).toHaveBeenCalledTimes(1)
+      expect(typeof token).toBe('string');
+      expect(jwt.sign).toHaveBeenCalledTimes(1);
       expect(jwt.sign).toHaveBeenCalledWith(
-        { id: mockedSignArg.userId },
-        TEST_PRIVATE_KEY
+        { id: USER_ID },
+        TEST_PRIVATE_KEY,
       );
     });
   });
 
   describe('verify', () => {
-
-  })
+    it('decoded된 token 반환', () => {
+      const TOKEN = 'TOKEN';
+      const decodedToken = jwtService.verify(TOKEN);
+      expect(decodedToken).toEqual({ id: USER_ID });
+      expect(jwt.verify).toHaveBeenCalledTimes(1);
+      expect(jwt.verify).toHaveBeenCalledWith(TOKEN, TEST_PRIVATE_KEY);
+    });
+  });
 });
