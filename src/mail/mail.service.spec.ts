@@ -1,11 +1,13 @@
 import { MailService } from './mail.service';
 import { Test } from '@nestjs/testing';
 import { CONFIG_OPTIONS } from '../common/common.constants';
+import * as FormData from 'form-data';
+import got from 'got';
 
-jest.mock('got', () => '');
-jest.mock('form-data', () => ({
-  append: jest.fn(),
-}));
+jest.mock('got');
+jest.mock('form-data');
+
+const TEST_DOMAIN = 'test-domain'
 
 describe('MailService', () => {
   let mailService: MailService;
@@ -18,7 +20,7 @@ describe('MailService', () => {
           provide: CONFIG_OPTIONS,
           useValue: {
             apiKey: 'test-apiKey',
-            domain: 'test-domain',
+            domain: TEST_DOMAIN,
             fromEmail: 'test-fromEmail',
           },
         },
@@ -60,7 +62,18 @@ describe('MailService', () => {
     });
   });
 
-  it.todo('sendEmail');
+  describe('sendEmail', () => {
+    it('send email', () => {
+      mailService.sendEmail('', '', [{ key: 'one', value: '1' }]);
+      const formSpy = jest.spyOn(FormData.prototype, 'append');
+      expect(formSpy).toHaveBeenCalled();
+      expect(got).toHaveBeenCalledWith(
+        `https://api.mailgun.net/v3/${TEST_DOMAIN}/messages`,
+        expect.any(Object),
+      );
+      expect(got).toHaveBeenCalledTimes(1);
+    });
+  });
 
 
 });
