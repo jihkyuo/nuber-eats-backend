@@ -2,6 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { DataSource } from 'typeorm';
+import * as request from 'supertest';
+
+const GRAPHQL_ENDPOINT = '/graphql';
 
 describe('UserModule (e2e)', () => {
   let app: INestApplication;
@@ -31,9 +34,33 @@ describe('UserModule (e2e)', () => {
     await app.close();
   });
 
+  describe('createAccount', () => {
+    const EMAIL = 'jio@naver.com';
+
+    it('계정 생성', () => {
+      return request(app.getHttpServer()).post(GRAPHQL_ENDPOINT).send({
+        query: `
+        mutation {
+           createAccount(input:{
+             email:"${EMAIL}",
+             password:"123",
+             role:Client
+           }){
+             ok
+             error
+           }
+        }
+        `,
+      }).expect(200).expect(res => {
+        expect(res.body.data.createAccount.ok).toBe(true);
+        expect(res.body.data.createAccount.error).toBeNull();
+      });
+    });
+  });
+
+
   it.todo('me');
   it.todo('userProfile');
-  it.todo('createAccount');
   it.todo('login');
   it.todo('editProfile');
   it.todo('verifyEmail');
