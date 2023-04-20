@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../src/app.module';
 
 describe('UserModule (e2e)', () => {
   let app: INestApplication;
@@ -13,6 +13,11 @@ describe('UserModule (e2e)', () => {
     app = module.createNestApplication();
     await app.init();
   });
+
+  afterAll(async () => {
+    await app.close()
+  })
+
   it.todo('me')
   it.todo('userProfile')
   it.todo('createAccount')
