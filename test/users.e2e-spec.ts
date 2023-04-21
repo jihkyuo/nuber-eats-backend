@@ -17,6 +17,7 @@ const testUser = {
 
 describe('UserModule (e2e)', () => {
   let app: INestApplication;
+  let jwtToken: string;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -103,6 +104,8 @@ describe('UserModule (e2e)', () => {
         `,
       }).expect(200).expect(res => {
         const { body: { data: { login: { ok, error, token } } } } = res;
+        jwtToken = token;
+
         expect(ok).toBe(true);
         expect(error).toBeNull();
         expect(token).toEqual(expect.any(String));
