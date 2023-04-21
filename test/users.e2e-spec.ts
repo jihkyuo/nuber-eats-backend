@@ -169,6 +169,30 @@ describe('UserModule (e2e)', () => {
           expect(id).toBe(userId);
         });
     });
+
+    it('유저 프로필 찾기 실패', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+          {
+            userProfile(userId:522){
+              ok
+              error
+              user {
+                id
+              }
+            }
+          }
+        `,
+        }).expect(200).expect(res => {
+          const { body: { data: { userProfile: { ok, error, user } } } } = res;
+          expect(ok).toBe(false);
+          expect(error).toEqual(expect.any(String));
+          expect(user).toBeNull();
+        });
+    });
   });
 
   it.todo('me');
