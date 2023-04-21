@@ -4,6 +4,11 @@ import { AppModule } from '../src/app.module';
 import { DataSource } from 'typeorm';
 import * as request from 'supertest';
 
+jest.mock('got',() => {
+  return {
+    post: jest.fn()
+  }
+})
 const GRAPHQL_ENDPOINT = '/graphql';
 
 describe('UserModule (e2e)', () => {
@@ -56,6 +61,8 @@ describe('UserModule (e2e)', () => {
         expect(res.body.data.createAccount.error).toBeNull();
       });
     });
+
+
   });
 
 
