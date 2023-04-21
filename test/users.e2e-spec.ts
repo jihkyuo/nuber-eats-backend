@@ -90,26 +90,46 @@ describe('UserModule (e2e)', () => {
     it('토큰 검증이 됐을 때, 로그인 성공', () => {
       return request(app.getHttpServer()).post(GRAPHQL_ENDPOINT).send({
         query: `
-        mutation {
-          login(input:{
-            email:"${testUser.email}",
-            password:"${testUser.password}"
-          }){
-            ok
-            error
-            token
+          mutation {
+            login(input:{
+              email:"${testUser.email}",
+              password:"${testUser.password}"
+            }){
+              ok
+              error
+              token
+            }
           }
-        }
         `,
       }).expect(200).expect(res => {
         const { body: { data: { login: { ok, error, token } } } } = res;
-        expect(ok).toBe(true)
-        expect(error).toBeNull()
-        expect(token).toEqual(expect.any(String))
+        expect(ok).toBe(true);
+        expect(error).toBeNull();
+        expect(token).toEqual(expect.any(String));
       });
     });
 
-    it.todo('토큰 검증 실패, 로그인 실패');
+    it('토큰 검증 실패, 로그인 실패', () => {
+      return request(app.getHttpServer()).post(GRAPHQL_ENDPOINT).send({
+        query: `
+          mutation {
+            login(input:{
+              email:"${testUser.email}",
+              password:"${testUser.password}error"
+            }){
+              ok
+              error
+              token
+            }
+          }
+        `,
+      }).expect(200).expect(res => {
+        const { body: { data: { login: { ok, error, token } } } } = res;
+        expect(ok).toBe(false);
+        expect(error).toBe('잘못된 비밀번호 입니다');
+        expect(token).toBeNull();
+      });
+    });
   });
 
   it.todo('me');
