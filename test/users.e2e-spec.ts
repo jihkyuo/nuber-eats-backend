@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as request from 'supertest';
+import { User } from '../src/users/entities/user.entity';
+import { getRepositoryToken } from '@nestjs/typeorm';
 
 jest.mock('got', () => {
   return {
@@ -17,6 +19,7 @@ const testUser = {
 
 describe('UserModule (e2e)', () => {
   let app: INestApplication;
+  let usersRepository: Repository<User>;
   let jwtToken: string;
 
   beforeAll(async () => {
@@ -25,6 +28,7 @@ describe('UserModule (e2e)', () => {
     }).compile();
 
     app = module.createNestApplication();
+    usersRepository = module.get<Repository<User>>(getRepositoryToken(User));
     await app.init();
   });
 
@@ -135,8 +139,39 @@ describe('UserModule (e2e)', () => {
     });
   });
 
+  describe('userProfile', () => {
+    let userId: number;
+    beforeAll(async () => {
+      const [user] = await usersRepository.find();
+      userId = user.id;
+    });
+
+    it('유저 프로필 find', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+          {
+            userProfile(userId:${userId}){
+              ok
+              error
+              user {
+                id
+              }
+            }
+          }
+        `,
+        }).expect(200).expect(res => {
+          const { body: { data: { userProfile: { ok, error, user: { id } } } } } = res;
+          expect(ok).toBe(true);
+          expect(error).toBeNull();
+          expect(id).toBe(userId);
+        });
+    });
+  });
+
   it.todo('me');
-  it.todo('userProfile');
   it.todo('editProfile');
   it.todo('verifyEmail');
 
