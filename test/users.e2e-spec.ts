@@ -62,7 +62,25 @@ describe('UserModule (e2e)', () => {
       });
     });
 
-
+    it('계정이 이미 있을경우, 계정 생성 실패',() => {
+      return request(app.getHttpServer()).post(GRAPHQL_ENDPOINT).send({
+        query: `
+        mutation {
+           createAccount(input:{
+             email:"${EMAIL}",
+             password:"123",
+             role:Client
+           }){
+             ok
+             error
+           }
+        }
+        `,
+      }).expect(200).expect(res => {
+        expect(res.body.data.createAccount.ok).toBe(false);
+        expect(res.body.data.createAccount.error).toBe("이미 이메일을 가진 사용자가 있습니다.");
+      });
+    })
   });
 
 
