@@ -4,12 +4,16 @@ import { AppModule } from '../src/app.module';
 import { DataSource } from 'typeorm';
 import * as request from 'supertest';
 
-jest.mock('got',() => {
+jest.mock('got', () => {
   return {
-    post: jest.fn()
-  }
-})
+    post: jest.fn(),
+  };
+});
 const GRAPHQL_ENDPOINT = '/graphql';
+const testUser = {
+  email: 'jio@naver.com',
+  password: '123',
+};
 
 describe('UserModule (e2e)', () => {
   let app: INestApplication;
@@ -40,15 +44,14 @@ describe('UserModule (e2e)', () => {
   });
 
   describe('createAccount', () => {
-    const EMAIL = 'jio@naver.com';
 
     it('계정 생성', () => {
       return request(app.getHttpServer()).post(GRAPHQL_ENDPOINT).send({
         query: `
         mutation {
            createAccount(input:{
-             email:"${EMAIL}",
-             password:"123",
+             email:"${testUser.email}",
+             password:"${testUser.password}",
              role:Client
            }){
              ok
@@ -62,13 +65,13 @@ describe('UserModule (e2e)', () => {
       });
     });
 
-    it('계정이 이미 있을경우, 계정 생성 실패',() => {
+    it('계정이 이미 있을경우, 계정 생성 실패', () => {
       return request(app.getHttpServer()).post(GRAPHQL_ENDPOINT).send({
         query: `
         mutation {
            createAccount(input:{
-             email:"${EMAIL}",
-             password:"123",
+             email:"${testUser.email}",
+             password:"${testUser.password}",
              role:Client
            }){
              ok
@@ -78,15 +81,39 @@ describe('UserModule (e2e)', () => {
         `,
       }).expect(200).expect(res => {
         expect(res.body.data.createAccount.ok).toBe(false);
-        expect(res.body.data.createAccount.error).toBe("이미 이메일을 가진 사용자가 있습니다.");
+        expect(res.body.data.createAccount.error).toBe('이미 이메일을 가진 사용자가 있습니다.');
       });
-    })
+    });
   });
 
+  describe('login', () => {
+    it('토큰 검증이 됐을 때, 로그인 성공', () => {
+      return request(app.getHttpServer()).post(GRAPHQL_ENDPOINT).send({
+        query: `
+        mutation {
+          login(input:{
+            email:"${testUser.email}",
+            password:"${testUser.password}"
+          }){
+            ok
+            error
+            token
+          }
+        }
+        `,
+      }).expect(200).expect(res => {
+        const { body: { data: { login: { ok, error, token } } } } = res;
+        expect(ok).toBe(true)
+        expect(error).toBeNull()
+        expect(token).toEqual(expect.any(String))
+      });
+    });
+
+    it.todo('토큰 검증 실패, 로그인 실패');
+  });
 
   it.todo('me');
   it.todo('userProfile');
-  it.todo('login');
   it.todo('editProfile');
   it.todo('verifyEmail');
 
